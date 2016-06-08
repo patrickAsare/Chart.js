@@ -161,6 +161,62 @@ var myPieChart = new Chart(ctx, {
 
 See `sample/line-customTooltips.html` for examples on how to get started.
 
+### Hyper Responsive Charts
+You can edit chart configuration at different breakpoints in order to produce hyper responsive charts. In the following example the chart changes at 976 and 1280. The result is a chart where more or less data is displayed depending on the viewport. Thia may provide an improved user experience.
+
+```javascript
+var myBar = new Chart(ctx, {
+    type: 'bar',
+    data: data,
+    options: {
+        responsive: true,
+        responsiveBreakPointConfig: {
+            defaultConfig: function(config) {
+                config.data.labels = ["January", "February", "March", "April", "May", "June", "July"];
+                config.data.datasets = [{
+                    label: 'Dataset 1',
+                    backgroundColor: "rgba(220,220,220,0.5)",
+                    data: [65, 56,  12, 67, 67, 62, 49]
+                }];
+
+                config.options.scales.yAxes[0].ticks.max = 100;
+                config.options.scales.yAxes[0].ticks.min = 0;
+                config.options.scales.yAxes[0].ticks.stepSize = 20;
+                return config;
+            },
+            breakPoints: {
+                1280: function(config) {
+                    config.data.labels = ["January", "February", "March", "April", "May"];
+                    config.data.datasets = [{
+                        label: 'Dataset 1',
+                        backgroundColor: "yellow",
+                        data: [65, 56,  12, 67, 67]
+                    }];
+
+                    config.options.scales.yAxes[0].ticks.max = 100;
+                    config.options.scales.yAxes[0].ticks.min = 0;
+                    config.options.scales.yAxes[0].ticks.stepSize = 10;
+                    return config;
+                },
+                976: function(config) {
+                    config.data.labels = ["Jan", "Feb"];
+                    config.data.datasets = [{
+                        label: 'Dataset 1',
+                        backgroundColor: "red",
+                        data: [65, 66]
+                    }];
+
+                    config.options.scales.yAxes[0].ticks.max = 67;
+                    config.options.scales.yAxes[0].ticks.min = 64;
+                    config.options.scales.yAxes[0].ticks.stepSize = 1;
+                    return config;
+                }
+            }
+        }
+    }
+});
+```
+
 ### Writing New Scale Types
 
 Starting with Chart.js 2.0 scales can be individually extended. Scales should always derive from Chart.Scale.

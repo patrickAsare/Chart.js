@@ -903,7 +903,7 @@ module.exports = function(Chart) {
 
 		return color(c);
 	};
-	helpers.addResizeListener = function(node, callback) {
+	helpers.addResizeListener = function(node, resizeChartCallback, updateConfigAtBreakpointCallback) {
 		// Hide an iframe before the node
 		var hiddenIframe = document.createElement('iframe');
 		var hiddenIframeClass = 'chartjs-hidden-iframe';
@@ -932,8 +932,11 @@ module.exports = function(Chart) {
 		node.insertBefore(hiddenIframe, node.firstChild);
 
 		(hiddenIframe.contentWindow || hiddenIframe).onresize = function() {
-			if (callback) {
-				callback();
+			if (resizeChartCallback) {
+				resizeChartCallback();
+			}
+			if (updateConfigAtBreakpointCallback) {
+				updateConfigAtBreakpointCallback();
 			}
 		};
 	};

@@ -50,12 +50,53 @@ module.exports = function() {
 			me.controller = new Chart.Controller(me);
 		}
 
-		// Always bind this so that if the responsive state changes we still work
-		helpers.addResizeListener(context.canvas.parentNode, function() {
+		var getUserDefinedBreakpoints = function() {
+			var breakPoints = false;
+			if (me.controller && me.controller.config.options.responsiveBreakPointConfig) {
+				breakPoints = Object.keys(me.controller.config.options.responsiveBreakPointConfig.breakPoints);
+				breakPoints = breakPoints.sort(function(a, b) {
+					return a - b;
+				});
+			}
+			return breakPoints;
+		};
+
+		me.selectedBreakPoint = false;
+		me.breakPointIndexes = getUserDefinedBreakpoints();
+
+		var updateConfigAtBreakpointCallback = function() {
+			var elementSize = context.canvas.width;
+			if (me.controller && me.controller.config.options.responsiveBreakPointConfig && me.controller.config.options.responsive) {
+
+				//change config back to default at non specified breakpoints
+				if (elementSize > parseInt(me.breakPointIndexes[me.breakPointIndexes.length - 1], 10)) {
+					me.controller.config = me.controller.config.options.responsiveBreakPointConfig.defaultConfig(me.controller.config);
+					me.controller.update(0, false);
+					return true;
+				}
+
+				//loop user defined breakpoints and update config when required
+				for (var i = 0; i < me.breakPointIndexes.length; ++i) {
+					var currentBreakPoint = me.breakPointIndexes[i];
+
+					if (elementSize < currentBreakPoint) {
+						me.selectedBreakPoint = currentBreakPoint;
+						me.controller.config.options.responsiveBreakPointConfig.breakPoints[currentBreakPoint](me.controller.config);
+						me.controller.update(0, false);
+						break;
+					}
+				}
+			}
+		};
+
+		var resizeChartCallback = function() {
 			if (me.controller && me.controller.config.options.responsive) {
 				me.controller.resize();
 			}
-		});
+		};
+
+		// Always bind this so that if the responsive state changes we still work
+		helpers.addResizeListener(context.canvas.parentNode, resizeChartCallback, updateConfigAtBreakpointCallback);
 
 		return me.controller ? me.controller : me;
 
